@@ -3,6 +3,8 @@ name: Random Daily Commits
 on:
   schedule:
     - cron: '0 11 * * *'  # Executa uma vez ao dia as 10am
+    
+  workflow_dispatch:
 
 jobs:
   random_commits:
