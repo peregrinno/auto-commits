@@ -1,0 +1,35 @@
+name: Random Daily Commits
+
+on:
+  schedule:
+    - cron: '0 11 * * *'  # Executa uma vez ao dia as 10am
+
+jobs:
+  random_commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "peregrinno"
+          git config --global user.email "joseluan74@gmail.com"
+
+      - name: Generate random number of commits
+        run: |
+          # Gera um número aleatório entre 1 e 10
+          RANDOM_COMMITS=$(( ( RANDOM % 10 )  + 1 ))
+          echo "Gerando $RANDOM_COMMITS commits para o dia."
+
+          # Loop para gerar os commits
+          for i in $(seq 1 $RANDOM_COMMITS); do
+            echo "Commit número $i em $(date)" >> commit.txt
+            git add commit.txt
+            git commit -m "Commit automático $i de $RANDOM_COMMITS no dia $(date)"
+          done
+
+      - name: Push commits
+        run: |
+          git push origin main
