@@ -6,6 +6,9 @@ on:
     
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   random_commits:
     runs-on: ubuntu-latest
@@ -33,5 +36,7 @@ jobs:
           done
 
       - name: Push commits
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN3D }}
         run: |
-          git push origin main
+          git push https://x-access-token:${{ secrets.TOKEN3D }}@github.com/peregrinno/auto-commits.git main
