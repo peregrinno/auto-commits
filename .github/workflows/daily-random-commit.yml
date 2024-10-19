@@ -83,15 +83,21 @@ jobs:
       - name: Wait for 10 seconds to ensure branch is processed
         run: sleep 10 # Adicionando um atraso de 10 segundos
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+      - name: Create Pull Request using GitHub API
+        uses: actions/github-script@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          title: "Adicionando commits automáticos via branch ${{ env.LATEST_BRANCH }}"
-          body: "Este pull request contém commits automáticos gerados pelo script."
-          branch: ${{ env.LATEST_BRANCH }} # Utiliza a branch mais recente mapeada
-          delete-branch: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branchName = process.env.BRANCH_NAME;
+            const { data: pr } = await github.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: branchName,
+              base: 'main',
+              title: `Adicionando commits automáticos via branch ${branchName}`,
+              body: 'Este pull request contém commits automáticos gerados pelo script.',
+            });
+            console.log(`Pull Request criado: ${pr.html_url}`);
 
       - name: Merge Pull Request
         uses: actions/github-script@v6
