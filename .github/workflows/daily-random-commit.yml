@@ -2,7 +2,7 @@ name: Random Daily Commits
 
 on:
   schedule:
-    - cron: "0 11 * * *" # Executa uma vez ao dia as 11:00 UTC
+    - cron: "0 11 * * *"
 
   workflow_dispatch:
 
@@ -12,7 +12,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write # Permissão para criar PR
+  pull-requests: write
 
 jobs:
   create_branch_and_commit:
@@ -39,10 +39,14 @@ jobs:
           RANDOM_COMMITS=$(( ( RANDOM % 10 )  + 1 ))
           echo "Gerando $RANDOM_COMMITS commits para o dia."
 
+          # Gera um prefixo aleatório
+          PREFIX=$(shuf -i 10000-99999 -n 1)
+          FILENAME="auto_src/${PREFIX}_commit.txt"
+
           # Loop para gerar os commits
           for i in $(seq 1 $RANDOM_COMMITS); do
-            echo "Commit número $i em $(date)" >> commit.txt
-            git add commit.txt
+            echo "Commit número $i em $(date)" >> $FILENAME
+            git add $FILENAME
             git commit -m "Commit automático $i de $RANDOM_COMMITS no dia $(date)"
           done
 
@@ -64,19 +68,24 @@ jobs:
 
       - name: Push commits to new branch
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Substitua o GITHUB_TOKEN pelo PAT_TOKEN
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           # Certifique-se de que a nova branch seja enviada corretamente ao repositório remoto
           git push --set-upstream https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
 
   merge_created_branches:
     runs-on: ubuntu-latest
-    needs: create_branch_and_commit # Job depende do Job anterior
+    needs: create_branch_and_commit
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # Necessário para pegar todas as branches
+          fetch-depth: 0
+
+      - name: Set up Git user for merge
+        run: |
+          git config --global user.name "peregrinno"
+          git config --global user.email "joseluan74@gmail.com"
 
       - name: List all branches that start with 'random-commits'
         run: |
@@ -86,18 +95,20 @@ jobs:
           echo "Branches encontradas: $BRANCHES"
           echo "BRANCHES=\"$BRANCHES\"" >> $GITHUB_ENV
 
-      - name: Merge branches into main
+      - name: Merge branches into chaos
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          BRANCHES: ${{ env.BRANCHES }}
         run: |
-          git checkout main
-          git pull origin main
+          git checkout chaos
+          git pull origin chaos
 
-          # Itera sobre as branches e faz merge de cada uma
+          # Itera sobre as branches e faz merge de cada uma usando a referência origin/<branch>
           for BRANCH in $(echo $BRANCHES); do
-            echo "Fazendo merge da branch $BRANCH para main"
-            git merge --no-ff "$BRANCH" || echo "Falha ao fazer merge da branch $BRANCH"
+            BRANCH=$(echo $BRANCH | tr -d '"') # Remove quaisquer aspas que ainda possam estar presentes
+            echo "Fazendo merge da branch origin/$BRANCH para chaos"
+            git merge --no-ff "origin/$BRANCH" || echo "Falha ao fazer merge da branch origin/$BRANCH"
           done
 
           # Push após o merge
-          git push origin main
+          git push origin chaos
