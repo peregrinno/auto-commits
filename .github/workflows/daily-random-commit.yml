@@ -86,18 +86,18 @@ jobs:
           echo "Branches encontradas: $BRANCHES"
           echo "BRANCHES=\"$BRANCHES\"" >> $GITHUB_ENV
 
-      - name: Merge branches into main
+      - name: Merge branches into chaos
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git checkout main
-          git pull origin main
+          git checkout chaos
+          git pull origin chaos
 
           # Itera sobre as branches e faz merge de cada uma
           for BRANCH in $(echo $BRANCHES); do
-            echo "Fazendo merge da branch $BRANCH para main"
+            echo "Fazendo merge da branch $BRANCH para chaos"
             git merge --no-ff "$BRANCH" || echo "Falha ao fazer merge da branch $BRANCH"
           done
 
           # Push após o merge
-          git push origin main
+          git push origin chaos
