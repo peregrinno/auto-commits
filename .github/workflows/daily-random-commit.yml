@@ -69,6 +69,17 @@ jobs:
           # Certifique-se de que a nova branch seja enviada corretamente ao repositório remoto
           git push --set-upstream https://x-access-token:${{ secrets.TOKEN3D }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
 
+      - name: Wait for branch to be available on remote
+        run: |
+          echo "Verificando se a branch foi enviada corretamente..."
+          REMOTE_BRANCH=$(git ls-remote --heads origin $BRANCH_NAME | wc -l)
+          while [ $REMOTE_BRANCH -eq 0 ]; do
+            echo "Branch $BRANCH_NAME ainda não está no repositório remoto. Tentando novamente em 10 segundos..."
+            sleep 10
+            REMOTE_BRANCH=$(git ls-remote --heads origin $BRANCH_NAME | wc -l)
+          done
+          echo "Branch $BRANCH_NAME foi encontrada no repositório remoto."
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
