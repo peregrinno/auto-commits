@@ -39,10 +39,14 @@ jobs:
           RANDOM_COMMITS=$(( ( RANDOM % 10 )  + 1 ))
           echo "Gerando $RANDOM_COMMITS commits para o dia."
 
+          # Gera um prefixo aleatório
+          PREFIX=$(shuf -i 10000-99999 -n 1)
+          FILENAME="auto_src/${PREFIX}_commit.txt"
+
           # Loop para gerar os commits
           for i in $(seq 1 $RANDOM_COMMITS); do
-            echo "Commit número $i em $(date)" >> commit.txt
-            git add commit.txt
+            echo "Commit número $i em $(date)" >> $FILENAME
+            git add $FILENAME
             git commit -m "Commit automático $i de $RANDOM_COMMITS no dia $(date)"
           done
 
