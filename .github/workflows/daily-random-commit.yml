@@ -2,8 +2,8 @@ name: Random Daily Commits
 
 on:
   schedule:
-    - cron: '0 11 * * *'  # Executa uma vez ao dia as 10am
-    
+    - cron: "0 11 * * *" # Executa uma vez ao dia as 8:00
+
   workflow_dispatch:
 
 permissions:
@@ -34,6 +34,18 @@ jobs:
             git add commit.txt
             git commit -m "Commit automático $i de $RANDOM_COMMITS no dia $(date)"
           done
+
+      - name: Create Python Hello World file
+        run: |
+          echo 'print("Hello, World!")' > helloworld.py
+          git add helloworld.py
+          git commit -m "Adicionando Hello World em Python"
+
+      - name: Create JavaScript Hello World file
+        run: |
+          echo 'console.log("Hello, World!");' > helloworld.js
+          git add helloworld.js
+          git commit -m "Adicionando Hello World em JavaScript"
 
       - name: Push commits
         env:
