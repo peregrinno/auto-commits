@@ -88,9 +88,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: main
-          title: "Adicionando commits automáticos via branch $BRANCH_NAME"
+          title: "Adicionando commits automáticos via branch ${{ env.LATEST_BRANCH }}"
           body: "Este pull request contém commits automáticos gerados pelo script."
-          branch: $BRANCH_NAME # Utiliza a branch já criada
+          branch: ${{ env.LATEST_BRANCH }} # Utiliza a branch mais recente mapeada
           delete-branch: true
 
       - name: Merge Pull Request
