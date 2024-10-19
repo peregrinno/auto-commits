@@ -80,11 +80,36 @@ jobs:
           done
           echo "Branch $BRANCH_NAME foi encontrada no repositório remoto."
 
+      - name: Wait for 10 seconds to ensure branch is processed
+        run: sleep 10 # Adicionando um atraso de 10 segundos
+
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Adicionando commits automáticos"
           base: main
           title: "Adicionando commits automáticos via branch $BRANCH_NAME"
           body: "Este pull request contém commits automáticos gerados pelo script."
+          branch: $BRANCH_NAME # Utiliza a branch já criada
+          delete-branch: true
+
+      - name: Merge Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pulls } = await github.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${context.payload.pull_request.head.ref}`,
+            });
+            if (pulls.length > 0) {
+              const pr = pulls[0];
+              await github.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                merge_method: 'merge',
+              });
+            }
