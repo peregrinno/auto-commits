@@ -26,8 +26,8 @@ jobs:
       - name: Create new branch
         run: |
           BRANCH_NAME="random-commits-$(date +%Y%m%d_%H%M%S)"
+          echo "Branch criada: $BRANCH_NAME"
           git checkout -b $BRANCH_NAME
-          echo "Criando nova branch $BRANCH_NAME"
 
       - name: Generate random number of commits
         run: |
@@ -62,6 +62,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN3D }}
         run: |
+          # Certifique-se de que a nova branch seja enviada corretamente ao repositório remoto
           git push https://x-access-token:${{ secrets.TOKEN3D }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
 
       - name: Create Pull Request
@@ -77,7 +78,7 @@ jobs:
       - name: Merge Pull Request
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.TOKEN3D }}
           script: |
             const { data: pulls } = await github.pulls.list({
               owner: context.repo.owner,
