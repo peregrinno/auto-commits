@@ -89,7 +89,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const branchName = process.env.BRANCH_NAME;
-            const { data: pr } = await github.pulls.create({
+            const pr = await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: branchName,
@@ -97,7 +97,7 @@ jobs:
               title: `Adicionando commits automáticos via branch ${branchName}`,
               body: 'Este pull request contém commits automáticos gerados pelo script.',
             });
-            console.log(`Pull Request criado: ${pr.html_url}`);
+            console.log(`Pull Request criado: ${pr.data.html_url}`);
 
       - name: Merge Pull Request
         uses: actions/github-script@v6
@@ -118,4 +118,3 @@ jobs:
                 pull_number: pr.number,
                 merge_method: 'merge',
               });
-            }
