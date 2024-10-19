@@ -6,10 +6,6 @@ on:
 
   workflow_dispatch:
 
-  push:
-    branches:
-      - main
-
 permissions:
   contents: write
   pull-requests: write # Permissão para criar PR
@@ -68,6 +64,9 @@ jobs:
         run: |
           # Certifique-se de que a nova branch seja enviada corretamente ao repositório remoto
           git push --set-upstream https://x-access-token:${{ secrets.TOKEN3D }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
+
+      - name: Wait for 10 seconds to ensure branch is processed
+        run: sleep 10 # Adicionando um atraso de 10 segundos
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
