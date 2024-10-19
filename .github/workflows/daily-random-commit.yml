@@ -23,6 +23,12 @@ jobs:
           git config --global user.name "peregrinno"
           git config --global user.email "joseluan74@gmail.com"
 
+      - name: Create new branch
+        run: |
+          BRANCH_NAME="random-commits-$(date +%Y%m%d_%H%M%S)"
+          git checkout -b $BRANCH_NAME
+          echo "Criando nova branch $BRANCH_NAME"
+
       - name: Generate random number of commits
         run: |
           # Gera um número aleatório entre 1 e 10
@@ -47,12 +53,6 @@ jobs:
           echo 'console.log("Hello, World!");' > helloworld.js
           git add helloworld.js
           git commit -m "Adicionando Hello World em JavaScript"
-
-      - name: Create new branch
-        run: |
-          BRANCH_NAME="random-commits-$(date +%Y%m%d_%H%M%S)"
-          git checkout -b $BRANCH_NAME
-          echo "Criando nova branch $BRANCH_NAME"
 
       - name: Push commits to new branch
         env:
