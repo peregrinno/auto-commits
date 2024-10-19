@@ -15,9 +15,8 @@ permissions:
   pull-requests: write # Permissão para criar PR
 
 jobs:
-  random_commits:
+  create_branch_and_commit:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -65,58 +64,40 @@ jobs:
 
       - name: Push commits to new branch
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Substitua o GITHUB_TOKEN pelo PAT_TOKEN
         run: |
           # Certifique-se de que a nova branch seja enviada corretamente ao repositório remoto
           git push --set-upstream https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
 
-      - name: Wait for branch to be available on remote
+  merge_created_branches:
+    runs-on: ubuntu-latest
+    needs: create_branch_and_commit # Job depende do Job anterior
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Necessário para pegar todas as branches
+
+      - name: List all branches that start with 'random-commits'
         run: |
-          echo "Verificando se a branch foi enviada corretamente..."
-          REMOTE_BRANCH=$(git ls-remote --heads origin $BRANCH_NAME | wc -l)
-          while [ $REMOTE_BRANCH -eq 0 ]; do
-            echo "Branch $BRANCH_NAME ainda não está no repositório remoto. Tentando novamente em 10 segundos..."
-            sleep 10
-            REMOTE_BRANCH=$(git ls-remote --heads origin $BRANCH_NAME | wc -l)
+          git fetch --all
+          # Lista todas as branches remotas que começam com 'random-commits'
+          BRANCHES=$(git branch -r | grep 'origin/random-commits')
+          echo "Branches encontradas: $BRANCHES"
+          echo "BRANCHES=\"$BRANCHES\"" >> $GITHUB_ENV
+
+      - name: Merge branches into main
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git checkout main
+          git pull origin main
+
+          # Itera sobre as branches e faz merge de cada uma
+          for BRANCH in $(echo $BRANCHES); do
+            echo "Fazendo merge da branch $BRANCH para main"
+            git merge --no-ff "$BRANCH" || echo "Falha ao fazer merge da branch $BRANCH"
           done
-          echo "Branch $BRANCH_NAME foi encontrada no repositório remoto."
 
-      - name: Wait for 10 seconds to ensure branch is processed
-        run: sleep 10 # Adicionando um atraso de 10 segundos
-
-      - name: Create Pull Request using GitHub API
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.PAT_TOKEN }} # Usando o PAT para criar o Pull Request
-          script: |
-            const branchName = process.env.BRANCH_NAME;
-            const pr = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: branchName, # Agora usando a variável corretamente
-              base: 'main',
-              title: `Adicionando commits automáticos via branch ${branchName}`,
-              body: 'Este pull request contém commits automáticos gerados pelo script.',
-            });
-            console.log(`Pull Request criado: ${pr.data.html_url}`);
-
-      - name: Merge Pull Request
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.PAT_TOKEN }} # Usando o PAT para fazer o merge do Pull Request
-          script: |
-            const { data: pulls } = await github.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              head: `${context.repo.owner}:${process.env.BRANCH_NAME}`,
-            });
-            if (pulls.length > 0) {
-              const pr = pulls[0];
-              await github.pulls.merge({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                merge_method: 'merge',
-              });
-            }
+          # Push após o merge
+          git push origin main
