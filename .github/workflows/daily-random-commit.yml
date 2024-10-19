@@ -89,3 +89,4 @@ jobs:
           base: main
           title: "Adicionando commits automáticos via branch $BRANCH_NAME"
           body: "Este pull request contém commits automáticos gerados pelo script."
+          skip-remote-checks: true # Desativa checagem remota para evitar problemas com branch
