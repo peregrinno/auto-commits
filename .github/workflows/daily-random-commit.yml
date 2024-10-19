@@ -42,17 +42,21 @@ jobs:
             git commit -m "Commit automático $i de $RANDOM_COMMITS no dia $(date)"
           done
 
-      - name: Create Python Hello World file
+      - name: Create Python Hello World file with random prefix
         run: |
-          echo 'print("Hello, World!")' > helloworld.py
-          git add helloworld.py
-          git commit -m "Adicionando Hello World em Python"
+          PREFIX=$(shuf -i 10000-99999 -n 1)
+          FILENAME="auto_src/${PREFIX}_helloworld.py"
+          echo 'print("Hello, World!")' > $FILENAME
+          git add $FILENAME
+          git commit -m "Adicionando Hello World em Python com prefixo aleatório: $FILENAME"
 
-      - name: Create JavaScript Hello World file
+      - name: Create JavaScript Hello World file with random prefix
         run: |
-          echo 'console.log("Hello, World!");' > helloworld.js
-          git add helloworld.js
-          git commit -m "Adicionando Hello World em JavaScript"
+          PREFIX=$(shuf -i 10000-99999 -n 1)
+          FILENAME="auto_src/${PREFIX}_helloworld.js"
+          echo 'console.log("Hello, World!");' > $FILENAME
+          git add $FILENAME
+          git commit -m "Adicionando Hello World em JavaScript com prefixo aleatório: $FILENAME"
 
       - name: Push commits to new branch
         env:
