@@ -70,35 +70,35 @@ jobs:
           git push --set-upstream https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
 
   merge_created_branches:
-  runs-on: ubuntu-latest
-  needs: create_branch_and_commit # Job depende do Job anterior
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # Necessário para pegar todas as branches
+    runs-on: ubuntu-latest
+    needs: create_branch_and_commit # Job depende do Job anterior
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Necessário para pegar todas as branches
 
-    - name: List all branches that start with 'random-commits'
-      run: |
-        git fetch --all
-        # Lista todas as branches remotas que começam com 'random-commits'
-        BRANCHES=$(git branch -r | grep 'origin/random-commits' | sed 's/origin\///g' | xargs)
-        echo "Branches encontradas: $BRANCHES"
-        echo "BRANCHES=\"$BRANCHES\"" >> $GITHUB_ENV
+      - name: List all branches that start with 'random-commits'
+        run: |
+          git fetch --all
+          # Lista todas as branches remotas que começam com 'random-commits'
+          BRANCHES=$(git branch -r | grep 'origin/random-commits' | sed 's/origin\///g' | xargs)
+          echo "Branches encontradas: $BRANCHES"
+          echo "BRANCHES=\"$BRANCHES\"" >> $GITHUB_ENV
 
-    - name: Merge branches into chaos
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        BRANCHES: ${{ env.BRANCHES }}
-      run: |
-        git checkout chaos
-        git pull origin chaos
+      - name: Merge branches into chaos
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          BRANCHES: ${{ env.BRANCHES }}
+        run: |
+          git checkout chaos
+          git pull origin chaos
 
-        # Itera sobre as branches e faz merge de cada uma usando a referência origin/<branch>
-        for BRANCH in $(echo $BRANCHES); do
-          echo "Fazendo merge da branch origin/$BRANCH para chaos"
-          git merge --no-ff "origin/$BRANCH" || echo "Falha ao fazer merge da branch origin/$BRANCH"
-        done
+          # Itera sobre as branches e faz merge de cada uma usando a referência origin/<branch>
+          for BRANCH in $(echo $BRANCHES); do
+            echo "Fazendo merge da branch origin/$BRANCH para chaos"
+            git merge --no-ff "origin/$BRANCH" || echo "Falha ao fazer merge da branch origin/$BRANCH"
+          done
 
-        # Push após o merge
-        git push origin chaos
+          # Push após o merge
+          git push origin chaos
