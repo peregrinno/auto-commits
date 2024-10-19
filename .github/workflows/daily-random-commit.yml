@@ -2,12 +2,13 @@ name: Random Daily Commits
 
 on:
   schedule:
-    - cron: "0 11 * * *" # Executa uma vez ao dia as 8:00
+    - cron: "0 11 * * *" # Executa uma vez ao dia as 11:00 UTC
 
   workflow_dispatch:
 
 permissions:
   contents: write
+  pull-requests: write # Permissão para criar PR
 
 jobs:
   random_commits:
@@ -47,8 +48,45 @@ jobs:
           git add helloworld.js
           git commit -m "Adicionando Hello World em JavaScript"
 
-      - name: Push commits
+      - name: Create new branch
+        run: |
+          BRANCH_NAME="random-commits-$(date +%Y%m%d_%H%M%S)"
+          git checkout -b $BRANCH_NAME
+          echo "Criando nova branch $BRANCH_NAME"
+
+      - name: Push commits to new branch
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN3D }}
         run: |
-          git push https://x-access-token:${{ secrets.TOKEN3D }}@github.com/peregrinno/auto-commits.git main
+          git push https://x-access-token:${{ secrets.TOKEN3D }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.TOKEN3D }}
+          commit-message: "Adicionando commits automáticos"
+          branch: $BRANCH_NAME
+          base: main
+          title: "Adicionando commits automáticos via branch $BRANCH_NAME"
+          body: "Este pull request contém commits automáticos gerados pelo script."
+
+      - name: Merge Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN3D }}
+          script: |
+            const { data: pulls } = await github.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${context.payload.pull_request.head.ref}`,
+            });
+            if (pulls.length > 0) {
+              const pr = pulls[0];
+              await github.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                merge_method: 'merge',
+              });
+            }
