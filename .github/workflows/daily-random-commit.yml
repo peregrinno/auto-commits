@@ -95,7 +95,7 @@ jobs:
           echo "Branches encontradas: $BRANCHES"
           echo "BRANCHES=\"$BRANCHES\"" >> $GITHUB_ENV
 
-      - name: Merge branches into chaos
+      - name: Merge branches into chaos and delete merged branches
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           BRANCHES: ${{ env.BRANCHES }}
@@ -107,7 +107,11 @@ jobs:
           for BRANCH in $(echo $BRANCHES); do
             BRANCH=$(echo $BRANCH | tr -d '"') # Remove quaisquer aspas que ainda possam estar presentes
             echo "Fazendo merge da branch origin/$BRANCH para chaos"
-            git merge --no-ff "origin/$BRANCH" || echo "Falha ao fazer merge da branch origin/$BRANCH"
+            git merge --no-ff "origin/$BRANCH" || { echo "Falha ao fazer merge da branch origin/$BRANCH"; continue; }
+            
+            # Se o merge for bem-sucedido, apaga a branch
+            echo "Merge bem-sucedido. Apagando branch origin/$BRANCH"
+            git push origin --delete "$BRANCH" || echo "Falha ao apagar a branch origin/$BRANCH"
           done
 
           # Push após o merge
