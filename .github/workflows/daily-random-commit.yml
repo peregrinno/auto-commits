@@ -64,10 +64,10 @@ jobs:
 
       - name: Push commits to new branch
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN3D }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Substitua o GITHUB_TOKEN pelo PAT_TOKEN
         run: |
           # Certifique-se de que a nova branch seja enviada corretamente ao repositório remoto
-          git push --set-upstream https://x-access-token:${{ secrets.TOKEN3D }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
+          git push --set-upstream https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/peregrinno/auto-commits.git $BRANCH_NAME
 
       - name: Wait for branch to be available on remote
         run: |
@@ -86,7 +86,7 @@ jobs:
       - name: Create Pull Request using GitHub API
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }} # Usando o PAT para criar o Pull Request
           script: |
             const branchName = process.env.BRANCH_NAME;
             const pr = await github.rest.pulls.create({
@@ -102,7 +102,7 @@ jobs:
       - name: Merge Pull Request
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }} # Usando o PAT para fazer o merge do Pull Request
           script: |
             const { data: pulls } = await github.pulls.list({
               owner: context.repo.owner,
@@ -118,3 +118,4 @@ jobs:
                 pull_number: pr.number,
                 merge_method: 'merge',
               });
+            }
