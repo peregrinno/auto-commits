@@ -85,7 +85,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Adicionando commits automáticos"
-          branch: $BRANCH_NAME # Usar o nome da branch criada
           base: main
           title: "Adicionando commits automáticos via branch $BRANCH_NAME"
           body: "Este pull request contém commits automáticos gerados pelo script."
