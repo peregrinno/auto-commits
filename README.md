@@ -1,6 +1,6 @@
 # AUTO-COMMITS!
 
-Tá com o github paradinho? Você coda feito maluco no git da empresa que trabalha e não tem tempo pra movitar o github?
+Tá com o github paradinho? Você coda feito maluco no git da empresa que trabalha e não tem tempo pra movimentar o github?
 
 <div style="text-align: center;">
     <img src="https://github.com/peregrinno/auto-commits/blob/main/image/README/1729347388499.png?raw=true" style="width:250px;">
