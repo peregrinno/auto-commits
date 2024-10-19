@@ -82,7 +82,7 @@ jobs:
         run: |
           git fetch --all
           # Lista todas as branches remotas que começam com 'random-commits'
-          BRANCHES=$(git branch -r | grep 'origin/random-commits')
+          BRANCHES=$(git branch -r | grep 'origin/random-commits' | sed 's/origin\///g' | xargs)
           echo "Branches encontradas: $BRANCHES"
           echo "BRANCHES=\"$BRANCHES\"" >> $GITHUB_ENV
 
