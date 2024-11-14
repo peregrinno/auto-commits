@@ -4,3 +4,4 @@ Commit número 3 em Thu Nov 14 11:15:09 UTC 2024
 Commit número 4 em Thu Nov 14 11:15:09 UTC 2024
 Commit número 5 em Thu Nov 14 11:15:09 UTC 2024
 Commit número 6 em Thu Nov 14 11:15:09 UTC 2024
+Commit número 7 em Thu Nov 14 11:15:09 UTC 2024
